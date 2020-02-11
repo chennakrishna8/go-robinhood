@@ -16,24 +16,33 @@ type Position struct {
 
 // CryptoCurrency represents a sub object listed in CryptoPosition
 type CryptoCurrency struct {
-	BrandColor string `json:"brand_color"`
-	Code       string `json:"code"`
-	ID         string `json:"id"`
+	BrandColor string  `json:"brand_color"`
+	Code       string  `json:"code"`
+	ID         string  `json:"id"`
 	Increment  float64 `json:"increment,string"`
-	Name       string `json:"name"`
-	Type       string `json:"type"`
+	Name       string  `json:"name"`
+	Type       string  `json:"type"`
+}
+
+// CostBases represents the actual cost the robinhood user paid for asset
+type CostBases struct {
+	CurrencyID      string  `json:"currency_id"`
+	DirectCostBasis float64 `json:"direct_cost_basis,string"`
+	DirectQuantity  float64 `json:"direct_quantity,string"`
+	ID              string  `json:"id"`
 }
 
 // CryptoPosition returns all crypto position associated with an account
 type CryptoPosition struct {
 	Meta
-	AccountID string `json:"account_id"`
-	ID string `json:"id"`
-	Currency CryptoCurrency `json:"currency"`
-	Quantity float64 `json:"quantity,string"`
-	QuantityAvailable float64 `json:"quantity_available,string"`
-	QuantityHeldForBuy float64 `json:"quantity_held_for_buy,string"`
-	QuantityHeldForSell float64 `json:"quantity_held_for_sell,string"`
+	AccountID           string         `json:"account_id"`
+	ID                  string         `json:"id"`
+	Currency            CryptoCurrency `json:"currency"`
+	Cost                CostBases      `json:"cost_bases"`
+	Quantity            float64        `json:"quantity,string"`
+	QuantityAvailable   float64        `json:"quantity_available,string"`
+	QuantityHeldForBuy  float64        `json:"quantity_held_for_buy,string"`
+	QuantityHeldForSell float64        `json:"quantity_held_for_sell,string"`
 }
 
 // GetPositions returns all the positions associated with an account.
@@ -72,7 +81,7 @@ func (c *Client) GetPositionsParams(a Account, p PositionParams) ([]Position, er
 
 // GetCryptoPositions returns all positions associated with the account
 func (c *Client) GetCryptoPositions() ([]CryptoPosition, error) {
-	var r struct { Results []CryptoPosition}
+	var r struct{ Results []CryptoPosition }
 	err := c.GetAndDecode(EPCryptoHoldings, &r)
 	if err != nil {
 		return nil, err
