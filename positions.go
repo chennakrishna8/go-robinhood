@@ -14,6 +14,28 @@ type Position struct {
 	SharesHeldForSells      float64 `json:"shares_held_for_sells,string"`
 }
 
+// CryptoCurrency represents a sub object listed in CryptoPosition
+type CryptoCurrency struct {
+	BrandColor string `json:"brand_color"`
+	Code       string `json:"code"`
+	ID         string `json:"id"`
+	Increment  float64 `json:"increment,string"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+}
+
+// CryptoPosition returns all crypto position associated with an account
+type CryptoPosition struct {
+	Meta
+	AccountID string `json:"account_id"`
+	ID string `json:"id"`
+	Currency CryptoCurrency `json:"currency"`
+	Quantity float64 `json:"quantity,string"`
+	QuantityAvailable float64 `json:"quantity_available,string"`
+	QuantityHeldForBuy float64 `json:"quantity_held_for_buy,string"`
+	QuantityHeldForSell float64 `json:"quantity_held_for_sell,string"`
+}
+
 // GetPositions returns all the positions associated with an account.
 func (c *Client) GetPositions(a Account) ([]Position, error) {
 	return c.GetPositionsParams(a, PositionParams{})
@@ -46,4 +68,15 @@ func (c *Client) GetPositionsParams(a Account, p PositionParams) ([]Position, er
 
 	var r struct{ Results []Position }
 	return r.Results, c.GetAndDecode(u.String(), &r)
+}
+
+// GetCryptoPositions returns all positions associated with the account
+func (c *Client) GetCryptoPositions() ([]CryptoPosition, error) {
+	var r struct { Results []CryptoPosition}
+	err := c.GetAndDecode(EPCryptoHoldings, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Results, err
 }
