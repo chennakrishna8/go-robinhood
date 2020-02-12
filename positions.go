@@ -38,7 +38,7 @@ type CryptoPosition struct {
 	AccountID           string         `json:"account_id"`
 	ID                  string         `json:"id"`
 	Currency            CryptoCurrency `json:"currency"`
-	Cost                CostBases      `json:"cost_bases"`
+	Cost                []CostBases      `json:"cost_bases"`
 	Quantity            float64        `json:"quantity,string"`
 	QuantityAvailable   float64        `json:"quantity_available,string"`
 	QuantityHeldForBuy  float64        `json:"quantity_held_for_buy,string"`
