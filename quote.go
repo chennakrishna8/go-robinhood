@@ -52,9 +52,9 @@ func (q Quote) Price() float64 {
 
 // GetCryptoQuote will return an array of current quotes
 // these will change almost every second
-func (c *Client) GetCryptoQuote(cryptoIds ...string) ([]CrytoQuote, error) {
+func (c *Client) GetCryptoQuote(cryptoIds ...string) ([]CryptoQuote, error) {
 	url := EPMarket + "/forex/quotes?ids=" + strings.Join(cryptoIds, ",")
-	var r struct{ Results []Quote }
+	var r struct{ Results []CryptoQuote }
 	err := c.GetAndDecode(url, &r)
 	return r.Results, err
 }
