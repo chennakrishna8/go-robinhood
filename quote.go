@@ -21,6 +21,19 @@ type Quote struct {
 	UpdatedAt                   string  `json:"updated_at"`
 }
 
+// CryptoQuote is a representation of data returned by robinhood api for cryto quote
+type CryptoQuote struct {
+	AskPrice  float64 `json:"ask_price,string"`
+	BidPrice  float64 `json:"bid_price,string"`
+	HighPrice float64 `json:"high_price,string"`
+	ID        string  `json:"id"`
+	LowPrice  float64 `json:"low_price,string"`
+	MarkPrice float64 `json:"mark_price,string"`
+	OpenPrice float64 `json:"open_price,string"`
+	Symbol    string  `json:"symbol"`
+	Volume    string  `json:"volume"`
+}
+
 // GetQuote returns all the latest stock quotes for the list of stocks provided
 func (c *Client) GetQuote(stocks ...string) ([]Quote, error) {
 	url := EPQuotes + "?symbols=" + strings.Join(stocks, ",")
@@ -35,4 +48,13 @@ func (q Quote) Price() float64 {
 		return q.LastTradePrice
 	}
 	return q.LastExtendedHoursTradePrice
+}
+
+// GetCryptoQuote will return an array of current quotes
+// these will change almost every second
+func (c *Client) GetCryptoQuote(cryptoIds ...string) ([]CrytoQuote, error) {
+	url := EPMarket + "/forex/quotes?ids=" + strings.Join(cryptoIds, ",")
+	var r struct{ Results []Quote }
+	err := c.GetAndDecode(url, &r)
+	return r.Results, err
 }
