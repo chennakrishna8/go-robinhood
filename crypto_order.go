@@ -2,6 +2,7 @@ package robinhood
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -73,9 +74,9 @@ func (c *Client) CryptoOrder(cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (
 		Quantity:       exactQuantity,
 		Price:          o.Price,
 		RefID:          uuid.New().String(),
-		Side:           o.Side.String(),
-		TimeInForce:    o.TimeInForce.String(),
-		Type:           o.Type.String(),
+		Side:           strings.ToLower(o.Side.String()),
+		TimeInForce:    strings.ToLower(o.TimeInForce.String()),
+		Type:           strings.ToLower(o.Type.String()),
 	}
 
 	payload, err := json.Marshal(a)
