@@ -2,7 +2,6 @@ package robinhood
 
 import (
 	"bytes"
-	"math"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -10,6 +9,8 @@ import (
 	"encoding/json"
 
 	"net/http"
+
+	"github.com/shopspring/decimal"
 )
 
 // CryptoOrder is the payload to create a crypto currency order
@@ -62,11 +63,14 @@ type CryptoOrderOpts struct {
 
 // CryptoOrder will actually place the order
 func (c *Client) CryptoOrder(cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (*CryptoOrderOutput, error) {
-	var quantity = math.Round(o.AmountInDollars / o.Price)
+	var amountInDollars = decimal.NewFromFloat32(float32(o.AmountInDollars))
+	var price = decimal.NewFromFloat32(float32(o.Price))
+	var quantity = amountInDollars.DivRound(price, 8)
+	exactQuantity, _ := quantity.Float64()
 	a := CryptoOrder{
 		AccountID:      c.CryptoAccount.ID,
 		CurrencyPairID: cryptoPair.ID,
-		Quantity:       quantity,
+		Quantity:       exactQuantity,
 		Price:          o.Price,
 		RefID:          uuid.New().String(),
 		Side:           o.Side.String(),
