@@ -26,6 +26,65 @@ type Account struct {
 	WithdrawalHalted           bool           `json:"withdrawal_halted"`
 }
 
+// UnifiedAccount gives you the whole account info
+type UnifiedAccount struct {
+	AccountBuyingPower struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"account_buying_power"`
+	CashAvailableFromInstantDeposits struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"cash_available_from_instant_deposits"`
+	CashHeldForCurrencyOrders struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"cash_held_for_currency_orders"`
+	CashHeldForDividends struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"cash_held_for_dividends"`
+	CashHeldForEquityOrders struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"cash_held_for_equity_orders"`
+	CashHeldForOptionsCollateral struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"cash_held_for_options_collateral"`
+	CashHeldForOrders struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"cash_held_for_orders"`
+	CryptoBuyingPower struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"crypto_buying_power"`
+	PortfolioEquity struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"portfolio_equity"`
+	UninvestedCash struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"uninvested_cash"`
+	WithdrawableCash struct {
+		Amount       string `json:"amount,float64"`
+		CurrencyCode string `json:"currency_code"`
+		CurrencyID   string `json:"currency_id"`
+	} `json:"withdrawable_cash"`
+}
+
 // CashBalances reflect the amount of cash available
 type CashBalances struct {
 	Meta
@@ -82,4 +141,17 @@ func (c *Client) GetCryptoAccounts() ([]CryptoAccount, error) {
 	}
 
 	return r.Results, err
+}
+
+// GetUnifiedAccount will return account information we can use
+func (c *Client) GetUnifiedAccount() (*UnifiedAccount, error) {
+	var r UnifiedAccount
+	url := PhoenixEPBase + PhoenixEPAccountUnified
+	err := c.GetAndDecode(url, &r)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &r, err
 }
