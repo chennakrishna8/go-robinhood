@@ -14,6 +14,9 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const ethPrecision = int32(6)
+const defaultPrecision = int32(8)
+
 // CryptoOrder is the payload to create a crypto currency order
 type CryptoOrder struct {
 	AccountID      string  `json:"account_id,omitempty"`
@@ -31,7 +34,7 @@ type CryptoOrderOutput struct {
 	Meta
 	Account            string        `json:"account"`
 	AveragePrice       float64       `json:"average_price,string"`
-	CancelURL          string        `json:"cancel"`
+	CancelURL          string        `json:"cancel_url"`
 	CreatedAt          string        `json:"created_at"`
 	CumulativeQuantity string        `json:"cumulative_quantity"`
 	CurrencyPairID     string        `json:"currency_pair_id"`
@@ -66,7 +69,11 @@ type CryptoOrderOpts struct {
 func (c *Client) CryptoOrder(cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (*CryptoOrderOutput, error) {
 	var amountInDollars = decimal.NewFromFloat32(float32(o.AmountInDollars))
 	var price = decimal.NewFromFloat32(float32(o.Price))
-	var quantity = amountInDollars.DivRound(price, 8)
+	var precision = defaultPrecision
+	if cryptoPair.CyrptoAssetCurrency.Code == "ETH" {
+		precision = ethPrecision
+	}
+	var quantity = amountInDollars.DivRound(price, precision)
 	exactQuantity, _ := quantity.Float64()
 	a := CryptoOrder{
 		AccountID:      c.CryptoAccount.ID,
