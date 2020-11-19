@@ -29,26 +29,33 @@ type CryptoOrder struct {
 	Type           string  `json:"type,omitempty"`
 }
 
+type Execution struct {
+	EffectivePrice float64 `json:"effective_Price,string"`
+	ID             string  `json:"id"`
+	Quantity       float64 `json:"quantity,string"`
+	Timestamp      string  `json:"timestamp"`
+}
+
 // CryptoOrderOutput holds the response from api
 type CryptoOrderOutput struct {
 	Meta
-	Account            string        `json:"account"`
-	AveragePrice       float64       `json:"average_price,string"`
-	CancelURL          string        `json:"cancel_url"`
-	CreatedAt          string        `json:"created_at"`
-	CumulativeQuantity string        `json:"cumulative_quantity"`
-	CurrencyPairID     string        `json:"currency_pair_id"`
-	Executions         []interface{} `json:"executions"`
-	ID                 string        `json:"id"`
-	LastTransactionAt  string        `json:"last_transaction_at"`
-	Price              float64       `json:"price,string"`
-	Quantity           string        `json:"quantity"`
-	RejectReason       string        `json:"reject_reason"`
-	Side               string        `json:"side"`
-	State              string        `json:"state"`
-	StopPrice          float64       `json:"stop_price,string"`
-	TimeInForce        string        `json:"time_in_force"`
-	Type               string        `json:"type"`
+	Account            string      `json:"account_id"`
+	AveragePrice       float64     `json:"average_price,string"`
+	CancelURL          string      `json:"cancel_url"`
+	CreatedAt          string      `json:"created_at"`
+	CumulativeQuantity string      `json:"cumulative_quantity"`
+	CurrencyPairID     string      `json:"currency_pair_id"`
+	Executions         []Execution `json:"executions"`
+	ID                 string      `json:"id"`
+	LastTransactionAt  string      `json:"last_transaction_at"`
+	Price              float64     `json:"price,string"`
+	Quantity           string      `json:"quantity"`
+	RejectReason       string      `json:"reject_reason"`
+	Side               string      `json:"side"`
+	State              string      `json:"state"`
+	StopPrice          float64     `json:"stop_price,string"`
+	TimeInForce        string      `json:"time_in_force"`
+	Type               string      `json:"type"`
 
 	client *Client
 }
@@ -125,4 +132,23 @@ func (o CryptoOrderOutput) Cancel() error {
 	}
 
 	return nil
+}
+
+// GetCryptoOrder will get the order info from robinhood
+func (c *Client) GetCryptoOrder(orderID string) (*CryptoOrderOutput, error) {
+	url := EPCryptoOrders + orderID
+	get, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var output CryptoOrderOutput
+	err = c.DoAndDecode(get, &output)
+
+	if err != nil {
+		return nil, err
+	}
+
+	output.client = c
+	return &output, nil
 }
