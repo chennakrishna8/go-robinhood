@@ -14,7 +14,7 @@ type Historical struct {
 }
 
 func (c *Client) GetDailyHistoricals(cryptoID string) ([]Historical, error) {
-	url := EPMarket + fmt.Printf("forex/historicals/${0}", cryptoID) + "/?bound=24_7&interval=day&span=week"
+	url := EPMarket + fmt.Sprintf("forex/historicals/${0}", cryptoID) + "/?bound=24_7&interval=day&span=week"
 	var r struct{ Results []Historical }
 	err := c.GetAndDecode(url, &r)
 	return r.Results, err
