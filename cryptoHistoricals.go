@@ -2,6 +2,15 @@ package robinhood
 
 import "fmt"
 
+// HistoricalData represents class ohlc data i.e open, high, low, close
+type HistoricalData struct {
+	Historicals []Historical `json:"data_points"`
+	Bounds      string       `json:"bounds"`
+	Interval    string       `json:"interval"`
+	Symbol      string       `json:"symbol"`
+	ID          string       `json:"id"`
+}
+
 // Historical data represents class ohlc data i.e open, high, low, close
 type Historical struct {
 	BeginsAt     string  `json:"begins_at"`
@@ -15,9 +24,9 @@ type Historical struct {
 }
 
 // GetDailyHistoricals will give daily high, low, ope, close data for the given symbol
-func (c *Client) GetDailyHistoricals(cryptoID string) ([]Historical, error) {
-	url := EPMarket + fmt.Sprintf("forex/historicals/${0}", cryptoID) + "/?bound=24_7&interval=day&span=week"
-	var r struct{ Results []Historical }
+func (c *Client) GetDailyHistoricals(cryptoID string) (HistoricalData, error) {
+	url := EPMarket + fmt.Sprintf("forex/historicals/%s", cryptoID) + "/?bounds=24_7&interval=day&span=week"
+	var r struct{ Results HistoricalData }
 	err := c.GetAndDecode(url, &r)
 	return r.Results, err
 }
