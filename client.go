@@ -28,6 +28,7 @@ const (
 	EPAccounts              = EPBase + "accounts/"
 	EPQuotes                = EPBase + "quotes/"
 	EPPortfolios            = EPBase + "portfolios/"
+	EPPositions             = EPBase + "positions/"
 	EPWatchlists            = EPBase + "watchlists/"
 	EPInstruments           = EPBase + "instruments/"
 	EPFundamentals          = EPBase + "fundamentals/"
@@ -48,17 +49,17 @@ type Client struct {
 
 // Dial returns a client given a TokenGetter. TokenGetter implementations are
 // available in this package, including a Cookie-based cache.
-func Dial(s oauth2.TokenSource) (*Client, error) {
+func Dial(ctx context.Context, s oauth2.TokenSource) (*Client, error) {
 	c := &Client{
 		Client: oauth2.NewClient(context.Background(), s),
 	}
 
-	a, err := c.GetAccounts()
+	a, err := c.GetAccounts(ctx)
 	if len(a) > 0 {
 		c.Account = &a[0]
 	}
 
-	ca, err := c.GetCryptoAccounts()
+	ca, err := c.GetCryptoAccounts(ctx)
 	if len(ca) > 0 {
 		c.CryptoAccount = &ca[0]
 	}
@@ -68,14 +69,13 @@ func Dial(s oauth2.TokenSource) (*Client, error) {
 
 // GetAndDecode retrieves from the endpoint and unmarshals resulting json into
 // the provided destination interface, which must be a pointer.
-func (c *Client) GetAndDecode(url string, dest interface{}) error {
+func (c *Client) GetAndDecode(ctx context.Context, url string, dest interface{}) error {
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36")
 	if err != nil {
 		return err
 	}
 
-	return c.DoAndDecode(req, dest)
+	return c.DoAndDecode(ctx, req, dest)
 }
 
 // ErrorMap encapsulates the helpful error messages returned by the API server
@@ -91,14 +91,14 @@ func (e ErrorMap) Error() string {
 
 // DoAndDecode provides useful abstractions around common errors and decoding
 // issues.
-func (c *Client) DoAndDecode(req *http.Request, dest interface{}) error {
-	res, err := c.Do(req)
+func (c *Client) DoAndDecode(ctx context.Context, req *http.Request, dest interface{}) error {
+	res, err := c.Do(req.WithContext(ctx))
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode/100 != 2 {
+	if res.StatusCode >= 400 {
 		b := &bytes.Buffer{}
 		var e ErrorMap
 		err = json.NewDecoder(io.TeeReader(res.Body, b)).Decode(&e)

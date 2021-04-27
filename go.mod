@@ -1,4 +1,4 @@
-module github.com/chennakrishna8/go-robinhood
+module astuart.co/go-robinhood/v2
 
 require (
 	github.com/davecgh/go-spew v1.1.1
@@ -10,8 +10,8 @@ require (
 	github.com/stretchr/testify v1.2.2
 	golang.org/x/net v0.0.0-20181207154023-610586996380 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
-	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
+	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
 	google.golang.org/appengine v1.3.0 // indirect
 )
 
-go 1.13
+go 1.15

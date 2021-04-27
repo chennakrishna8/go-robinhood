@@ -3,6 +3,8 @@ package robinhood
 import (
 	"bytes"
 	"strings"
+	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -42,7 +44,6 @@ type CryptoOrderOutput struct {
 	Account            string      `json:"account_id"`
 	AveragePrice       float64     `json:"average_price,string"`
 	CancelURL          string      `json:"cancel_url"`
-	CreatedAt          string      `json:"created_at"`
 	CumulativeQuantity string      `json:"cumulative_quantity"`
 	CurrencyPairID     string      `json:"currency_pair_id"`
 	Executions         []Execution `json:"executions"`
@@ -73,7 +74,7 @@ type CryptoOrderOpts struct {
 }
 
 // CryptoOrder will actually place the order
-func (c *Client) CryptoOrder(cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (*CryptoOrderOutput, error) {
+func (c *Client) CryptoOrder(ctx context.Context, cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (*CryptoOrderOutput, error) {
 	var amountInDollars = decimal.NewFromFloat32(float32(o.AmountInDollars))
 	var price = decimal.NewFromFloat32(float32(o.Price))
 	var precision = defaultPrecision
@@ -100,28 +101,27 @@ func (c *Client) CryptoOrder(cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (
 	}
 
 	post, err := http.NewRequest("POST", EPCryptoOrders, bytes.NewReader(payload))
+	if err != nil {
+		return nil, fmt.Errorf("could not create Crypto http.Request: %v", err)
+	}
+
 	post.Header.Add("Content-Type", "application/json")
 
 	var out CryptoOrderOutput
-	err = c.DoAndDecode(post, &out)
-
-	if err != nil {
-		return nil, err
-	}
-
+	err = c.DoAndDecode(ctx, post, &out)
 	out.client = c
-	return &out, nil
+	return &out, err
 }
 
-// Cancel will cancel the order
-func (o CryptoOrderOutput) Cancel() error {
+// Cancel will cancel the order.
+func (o CryptoOrderOutput) Cancel(ctx context.Context) error {
 	post, err := http.NewRequest("POST", o.CancelURL, nil)
 	if err != nil {
 		return err
 	}
 
 	var output CryptoOrderOutput
-	err = o.client.DoAndDecode(post, &output)
+	err = o.client.DoAndDecode(ctx, post, &output)
 
 	if err != nil {
 		return errors.Wrap(err, "could not decode response")
@@ -135,7 +135,7 @@ func (o CryptoOrderOutput) Cancel() error {
 }
 
 // GetCryptoOrder will get the order info from robinhood
-func (c *Client) GetCryptoOrder(orderID string) (*CryptoOrderOutput, error) {
+func (c *Client) GetCryptoOrder(ctx context.Context, orderID string) (*CryptoOrderOutput, error) {
 	url := EPCryptoOrders + orderID
 	get, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -143,7 +143,7 @@ func (c *Client) GetCryptoOrder(orderID string) (*CryptoOrderOutput, error) {
 	}
 
 	var output CryptoOrderOutput
-	err = c.DoAndDecode(get, &output)
+	err = c.DoAndDecode(ctx, get, &output)
 
 	if err != nil {
 		return nil, err

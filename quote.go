@@ -1,6 +1,7 @@
 package robinhood
 
 import (
+	"context"
 	"strings"
 )
 
@@ -35,10 +36,10 @@ type CryptoQuote struct {
 }
 
 // GetQuote returns all the latest stock quotes for the list of stocks provided
-func (c *Client) GetQuote(stocks ...string) ([]Quote, error) {
+func (c *Client) GetQuote(ctx context.Context, stocks ...string) ([]Quote, error) {
 	url := EPQuotes + "?symbols=" + strings.Join(stocks, ",")
 	var r struct{ Results []Quote }
-	err := c.GetAndDecode(url, &r)
+	err := c.GetAndDecode(ctx, url, &r)
 	return r.Results, err
 }
 
@@ -52,9 +53,9 @@ func (q Quote) Price() float64 {
 
 // GetCryptoQuote will return an array of current quotes
 // these will change almost every second
-func (c *Client) GetCryptoQuote(cryptoIds ...string) ([]CryptoQuote, error) {
+func (c *Client) GetCryptoQuote(ctx context.Context, cryptoIds ...string) ([]CryptoQuote, error) {
 	url := EPMarket + "forex/quotes/?ids=" + strings.Join(cryptoIds, ",")
 	var r struct{ Results []CryptoQuote }
-	err := c.GetAndDecode(url, &r)
+	err := c.GetAndDecode(ctx, url, &r)
 	return r.Results, err
 }

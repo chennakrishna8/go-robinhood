@@ -1,6 +1,9 @@
 package robinhood
 
-import "strings"
+import (
+	"context"
+	"strings"
+)
 
 type Fundamental struct {
 	Open          float64 `json:"open,string"`
@@ -17,10 +20,10 @@ type Fundamental struct {
 	Instrument    string  `json:"instrument"`
 }
 
-// GetFundamentals returns fundemental data for the list of stocks provided.
-func (c *Client) GetFundamentals(stocks ...string) ([]Fundamental, error) {
+// GetFundamentals returns fundamental data for the list of stocks provided.
+func (c *Client) GetFundamentals(ctx context.Context, stocks ...string) ([]Fundamental, error) {
 	url := EPFundamentals + "?symbols=" + strings.Join(stocks, ",")
 	var r struct{ Results []Fundamental }
-	err := c.GetAndDecode(url, &r)
+	err := c.GetAndDecode(ctx, url, &r)
 	return r.Results, err
 }
